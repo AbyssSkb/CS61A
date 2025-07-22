@@ -17,6 +17,7 @@ class Account:
     >>> a.time_to_retire(100)
     117
     """
+
     max_withdrawal = 10
     interest = 0.02
 
@@ -40,6 +41,13 @@ class Account:
         """Return the number of years until balance would grow to amount."""
         assert self.balance > 0 and amount > 0 and self.interest > 0
         "*** YOUR CODE HERE ***"
+        balance = self.balance
+        year = 0
+        while balance < amount:
+            balance *= 1 + self.interest
+            year += 1
+
+        return year
 
 
 class FreeChecking(Account):
@@ -66,10 +74,22 @@ class FreeChecking(Account):
     >>> ch.withdraw(5)  # Not enough to cover fee + withdraw
     'Insufficient funds'
     """
+
     withdraw_fee = 1
     free_withdrawals = 2
 
     "*** YOUR CODE HERE ***"
+
+    def __init__(self, account_holder):
+        super().__init__(account_holder)
+        self.free_withdrawals = FreeChecking.free_withdrawals
+
+    def withdraw(self, amount):
+        if self.free_withdrawals:
+            self.free_withdrawals -= 1
+            return super().withdraw(amount)
+
+        return super().withdraw(amount + FreeChecking.withdraw_fee)
 
 
 def without(s, i):
@@ -86,6 +106,12 @@ def without(s, i):
     True
     """
     "*** YOUR CODE HERE ***"
+    if s is Link.empty:
+        return Link.empty
+    if i == 0:
+        return s.rest
+
+    return Link(s.first, without(s.rest, i - 1))
 
 
 def duplicate_link(s, val):
@@ -105,6 +131,14 @@ def duplicate_link(s, val):
     Link(1, Link(2, Link(2, Link(2, Link(2, Link(3))))))
     """
     "*** YOUR CODE HERE ***"
+    if s is Link.empty:
+        return
+
+    if s.first == val:
+        s.rest = Link(val, s.rest)
+        s = s.rest
+
+    duplicate_link(s.rest, val)
 
 
 class Link:
@@ -127,6 +161,7 @@ class Link:
     >>> print(s)                             # Prints str(s)
     <5 7 <8 9>>
     """
+
     empty = ()
 
     def __init__(self, first, rest=empty):
@@ -136,15 +171,14 @@ class Link:
 
     def __repr__(self):
         if self.rest is not Link.empty:
-            rest_repr = ', ' + repr(self.rest)
+            rest_repr = ", " + repr(self.rest)
         else:
-            rest_repr = ''
-        return 'Link(' + repr(self.first) + rest_repr + ')'
+            rest_repr = ""
+        return "Link(" + repr(self.first) + rest_repr + ")"
 
     def __str__(self):
-        string = '<'
+        string = "<"
         while self.rest is not Link.empty:
-            string += str(self.first) + ' '
+            string += str(self.first) + " "
             self = self.rest
-        return string + str(self.first) + '>'
-
+        return string + str(self.first) + ">"
