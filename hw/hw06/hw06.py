@@ -1,4 +1,5 @@
-passphrase = 'REPLACE_THIS_WITH_PASSPHRASE'
+passphrase = "REPLACE_THIS_WITH_PASSPHRASE"
+
 
 def midsem_survey(p):
     """
@@ -7,7 +8,8 @@ def midsem_survey(p):
     '2bf925d47c03503d3ebe5a6fc12d479b8d12f14c0494b43deba963a0'
     """
     import hashlib
-    return hashlib.sha224(p.encode('utf-8')).hexdigest()
+
+    return hashlib.sha224(p.encode("utf-8")).hexdigest()
 
 
 class VendingMachine:
@@ -47,9 +49,14 @@ class VendingMachine:
     >>> w.vend()
     'Here is your soda.'
     """
+
     def __init__(self, product, price):
         """Set the product and its price, as well as other instance attributes."""
         "*** YOUR CODE HERE ***"
+        self.product = product
+        self.price = price
+        self.stock = 0
+        self.balance = 0
 
     def restock(self, n):
         """Add n to the stock and return a message about the updated stock level.
@@ -57,6 +64,8 @@ class VendingMachine:
         E.g., Current candy stock: 3
         """
         "*** YOUR CODE HERE ***"
+        self.stock += n
+        return f"Current {self.product} stock: {self.stock}"
 
     def add_funds(self, n):
         """If the machine is out of stock, return a message informing the user to restock
@@ -69,6 +78,11 @@ class VendingMachine:
         E.g., Current balance: $4
         """
         "*** YOUR CODE HERE ***"
+        if self.stock == 0:
+            return f"Nothing left to vend. Please restock. Here is your ${n}."
+
+        self.balance += n
+        return f"Current balance: ${self.balance}"
 
     def vend(self):
         """Dispense the product if there is sufficient stock and funds and
@@ -82,6 +96,18 @@ class VendingMachine:
               Please add $3 more funds.
         """
         "*** YOUR CODE HERE ***"
+        if self.stock == 0:
+            return "Nothing left to vend. Please restock."
+
+        if self.balance >= self.price:
+            change = self.balance - self.price
+            self.stock -= 1
+            self.balance = 0
+            if change:
+                return f"Here is your {self.product} and ${change} change."
+            return f"Here is your {self.product}."
+
+        return f"Please add ${self.price - self.balance} more funds."
 
 
 def store_digits(n):
@@ -104,6 +130,16 @@ def store_digits(n):
     >>> print("Do not use str or reversed!") if any([r in cleaned for r in ["str", "reversed"]]) else None
     """
     "*** YOUR CODE HERE ***"
+    if n < 10:
+        return Link(n)
+
+    sub_link = store_digits(n // 10)
+    p = sub_link
+    while p.rest is not Link.empty:
+        p = p.rest
+
+    p.rest = Link(n % 10)
+    return sub_link
 
 
 def deep_map_mut(func, s):
@@ -126,6 +162,14 @@ def deep_map_mut(func, s):
     <9 <16> 25 36>
     """
     "*** YOUR CODE HERE ***"
+    p = s
+    while p is not Link.empty:
+        if isinstance(p.first, Link):
+            deep_map_mut(func, p.first)
+        else:
+            p.first = func(p.first)
+
+        p = p.rest
 
 
 def two_list(vals, counts):
@@ -147,6 +191,14 @@ def two_list(vals, counts):
     Link(1, Link(1, Link(3, Link(3, Link(2)))))
     """
     "*** YOUR CODE HERE ***"
+    if len(counts) == 1 and counts[0] == 1:
+        return Link(vals[0])
+
+    if counts[0] == 1:
+        return Link(vals[0], two_list(vals[1:], counts[1:]))
+
+    counts[0] -= 1
+    return Link(vals[0], two_list(vals, counts))
 
 
 class Link:
@@ -169,6 +221,7 @@ class Link:
     >>> print(s)                             # Prints str(s)
     <5 7 <8 9>>
     """
+
     empty = ()
 
     def __init__(self, first, rest=empty):
@@ -178,15 +231,14 @@ class Link:
 
     def __repr__(self):
         if self.rest is not Link.empty:
-            rest_repr = ', ' + repr(self.rest)
+            rest_repr = ", " + repr(self.rest)
         else:
-            rest_repr = ''
-        return 'Link(' + repr(self.first) + rest_repr + ')'
+            rest_repr = ""
+        return "Link(" + repr(self.first) + rest_repr + ")"
 
     def __str__(self):
-        string = '<'
+        string = "<"
         while self.rest is not Link.empty:
-            string += str(self.first) + ' '
+            string += str(self.first) + " "
             self = self.rest
-        return string + str(self.first) + '>'
-
+        return string + str(self.first) + ">"
