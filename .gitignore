@@ -213,3 +213,5 @@ __marimo__/
 
 .ok_storage.db
 .ok_history
+
+node_modules
